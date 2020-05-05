@@ -15,12 +15,15 @@ R_0 = 2.3 # mentioned in the abstract of [1]
 ξ  = 0.01 # km^-2. density weight factor
 pg = np.array( [0,1,0] ) # mobility factor by age strata
 μg = np.array( [1/1,1/7,1/7] ) # escape (from Infected) rate by age group
+# Cambiar:
 γg = np.array( [0.002, 0.05, 0.36] ) # fraction of cases requiring ICU by age group
+# Cambiar:
 kg = np.array( [11.8, 13.3, 6.6] ) # average contacts per day by age group
 αg = np.array( [1/8.86, 1/2.86, 1/2.86] ) # asymptomatic infectious rate by age group
 Cgh  = np.array( [[0.5980, 0.3849, 0.0171],
                [0.2440, 0.7210, 0.0350],
                [0.1919, 0.5705, 0.2376]] ) # contacts-by-age-strata matrix
+# Cambiar:
 σ  = 2.5 # average household size in Spain
 ν = 0.6 # isolation factor
 κ0 = 0.7 # confinement factor: adjustable for containment (κ0 = 0.7 mentioned in [2])

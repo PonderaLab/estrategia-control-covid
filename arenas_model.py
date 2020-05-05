@@ -3,6 +3,14 @@
 import numpy as np
 from helper_functions import *
 
+def runtest():
+    '''
+    Runs the tests.py.
+    '''
+    from test import main
+    main()
+
+
 # Define one markov step
 def markov_step(x, M):
     '''

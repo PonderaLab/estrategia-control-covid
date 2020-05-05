@@ -5,8 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from arenas_model import *
 
-if __name__ == '__main__':
 
+def main():
     # Set model dimensions. The model has NC compartiments, NP patches and NG age stratas
     NP = 10
     NG = 3
@@ -128,3 +128,8 @@ if __name__ == '__main__':
     plt.title('Aggregate of all cases')
     plt.legend()
     plt.show()
+
+
+if __name__ == '__main__':
+    main()
+
