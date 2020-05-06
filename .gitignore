@@ -1,2 +1,5 @@
 ## Ignore notebooks
 *.ipynb
+
+## Ignore cached scripts
+*__pycache__/
