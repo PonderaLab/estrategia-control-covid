@@ -1,15 +1,14 @@
-## Main script to run the Arenas epidemic model of [1,2]
+## Main script to run the Arenas epidemic model of [1,2] aggregating spatial and age couplings.
 
 import numpy as np
-from helper_functions import *
+# from helper_functions import *
 
 def runtest():
     '''
-    Runs the tests.py.
+    Runs the test.py.
     '''
     from test import main
     main()
-
 
 # Define one markov step
 def markov_step(x, M):
@@ -35,76 +34,59 @@ def markov_step(x, M):
         M_DH * H + M_DD * D
     ])
 
-def iterate_model(x0, T, params, ext_params):
+def iterate_model(x0, T, params):
     '''
     Solves the markovian model for `T` time steps (days) for the initial conditions `x0` and the set of parameters `params` and `ext_params`.
 
     Inputs:
     `x0`: list with the initial compartiment densities (S0, E0, A0, I0, H0, R0, D0)
-    `params`': list of parameters in the same order than in Arenas report [2]: (β, kg, ηg, αg, ν, μg, γg, ωg, ψg, χg, n_ig, R_ij, C_gh, ξ, pg, σ, κ0, ϕ)
-    `ext_params`: list of pre-computed quantities necessary for the model: (zg * kg, f(n_i_eff/s_i), n_ig_eff)
+    `params`': list of parameters in the same order than in Arenas report [2]: (β, kg, ηg, αg, ν, μg, γg, ωg, ψg, χg, n_ig, σ, κ0, ϕ, tc, tf)
 
-    Note: `ext_params` are not included in params for efficiency reasons.
-    `ext_params` includes the normalization factor times the number of contacts `zk_g`, the effective density population vector `f(x_i)` and the effective population matrix `n_ig_eff`.
-    For the bayes approach, we wouldn't want to compute these quantities for every simulation.
+    Output:
+    `flow`: 7-dimensional time series. Each dimension corresponds to S(t), E(t), A(t), I(t), H(t), R(t), D(t) respectively.
     '''
 
     ## READING ##
 
-    # Read parameters
+    # Read parameters (1-D treatment. In the general treatment, suffix `g` indicates an NG-sized vector)
     β = params[0]
-    kg = params[1]#[1]
-    ηg = params[2]
-    αg = params[3]#[1]
-    ν  = params[4]
-    μg = params[5]#[1]
-    γg = params[6]#[1]
-    ωg = params[7]
-    ψg = params[8]
-    χg = params[9]
-    n_ig = params[10]#[0][0]
-    R_ij = params[11]
-    C_gh = params[12]
-    ξ  = params[13]
-    pg = params[14]#[1]
-    σ  = params[15]
-    κ0 = params[16]
-    ϕ  = params[17]
-    tc = params[18]
-    tf = params[19] # containtment end
-    # Recurrent computation
-    one_minus_pg = 1 - pg
+    k = params[1]
+    η = params[2]
+    α = params[3]
+    ν = params[4]
+    μ = params[5]
+    γ = params[6]
+    ω = params[7]
+    ψ = params[8]
+    χ = params[9]
+    n = params[10] # population
+    # containtment params
+    σ  = params[11]
+    κ0 = params[12]
+    ϕ  = params[13]
+    tc = params[14]
+    tf = params[15]
 
-    # Read external parameters related to population (and number of contacts) They don't change at all
-    zk_g, f_i, n_ig_eff = ext_params
-
-    ## PRECOMPUTING
-    # Compute probability of infection
-    # >1-D
-    # ρ_t_eff = get_ρ_ig_eff(x0[2]+ν*x0[3] , n_ig, n_ig_eff, R_ij, C_gh, pg, one_minus_pg)
-    # Q_t = Q_ig( zk_g, f_i, ρ_t_eff )
-    # P_t = P_ig(β, Q_t)
-    # Π_t = Π_ig( P_t, R_ij, pg, one_minus_pg)
-
-    # 1-D treatment
-    Π_t = Π_1D( x0[2]+ ν*x0[3], β, kg)
+    # Compute transmission probability
+    Π_t = Π_1D( x0[2]+ ν*x0[3], β, k)
 
     # Compute interaction terms
     M_SS = 1 - Π_t
     M_ES = Π_t
-    M_EE = 1 - ηg
-    M_AE = ηg
-    M_AA = 1 - αg
-    M_IA = αg
-    M_II = 1 - μg
-    M_HI = μg * γg
-    M_HH = ωg * (1 - ψg) + (1 - ωg)*(1 - χg)
-    M_RI = μg * (1 - γg)
-    M_RH = (1 - ωg) * χg
+    M_EE = 1 - η
+    M_AE = η
+    M_AA = 1 - α
+    M_IA = α
+    M_II = 1 - μ
+    M_HI = μ * γ
+    M_HH = ω * (1 - ψ) + (1 - ω)*(1 - χ)
+    M_RI = μ * (1 - γ)
+    M_RH = (1 - ω) * χ
     M_RR = 1
-    M_DH = ωg * ψg
+    M_DH = ω * ψ
     M_DD = 1
 
+    ## Non-zero interactions for transition-like matrix
     M = [M_SS, M_ES, M_EE, M_AE, M_AA, M_IA, M_II, M_HI, M_HH, M_RI, M_RH, M_RR, M_DH, M_DD]
 
     ## PREALLOCATION
@@ -123,31 +105,22 @@ def iterate_model(x0, T, params, ext_params):
 
         # Containtment
         if t+1 == tc:
-            # mid-agers (1-D treatment)
-            kg = (1-κ0)*kg + κ0*(σ-1)
-            pg = (1-κ0)*pg
+            # Lower avg. number of contacts as a function of containtment
+            k = (1-κ0)*k + κ0*(σ-1)
 
             # 1-D treatment
-            Π_t = Π_1D( x_new[2]+ν*x_new[3], β, kg )
+            Π_t = Π_1D( x_new[2]+ν*x_new[3], β, k )
 
-            ## Contained people (susceptible + recovered) (no 1-D treatment here)
-            # C_tc = ( np.dot( x_new[0]+x_new[5], n_ig ) / get_n_i(n_ig) )**σ
-
-            # 1-D treatment
+            ## Contained people (susceptible + recovered)
             C_tc = ( x_new[0]+x_new[5] )**σ
 
             # update dynamic interaction terms
             M[0] = (1 - Π_t)*(1 - (1 - ϕ)*κ0*C_tc)
             M[1] = Π_t*(1 - (1 - ϕ)*κ0*C_tc)
         else:
-            # compute new prob. of infection
-            # ρ_t_eff = get_ρ_ig_eff( x_new[2]+ν*x_new[3] , n_ig, n_ig_eff, R_ij, C_gh, pg, one_minus_pg)
-            # Q_t = Q_ig( zk_g, f_i, ρ_t_eff )
-            # P_t = P_ig(β, Q_t)
-            # Π_t = Π_ig( P_t, R_ij, pg, one_minus_pg)
 
-            # 1-D treatment
-            Π_t = Π_1D( x_new[2]+ν*x_new[3], β, kg )
+            # Update probability of transmission
+            Π_t = Π_1D( x_new[2]+ν*x_new[3], β, k )
 
             # update dynamic interaction terms
             M[0] = (1 - Π_t)
@@ -156,20 +129,25 @@ def iterate_model(x0, T, params, ext_params):
         # end of containtment
         if t+1 == tc+tf:
             # mid-agers (1-D treatment)
-            kg = (kg - κ0*(σ-1))/(1 - κ0)
-            pg = pg/(1 - κ0)
+            k = ( k - κ0*(σ-1) ) / (1 - κ0)
 
             # 1-D treatment
-            Π_t = Π_1D( x_new[2]+ν*x_new[3], β, kg )
+            Π_t = Π_1D( x_new[2]+ν*x_new[3], β, k )
 
             # update dynamic interaction terms
             M[0] = (1 - Π_t)*(1 + (1 - ϕ)*κ0*C_tc)
             M[1] = Π_t*(1 + (1 - ϕ)*κ0*C_tc)
 
-
-
         x_old = x_new
 
-
-
     return flow
+
+## Helper functions
+# Probability of infection for 1D treatment of the model
+def Π_1D(ρ, β, k):
+    '''
+    Returns the probability of infection per patch per age strata per day considering the effective mobility patterns.
+    This function is designed for the aggregate model, where NP = NG = 1.
+    The output is a scalar.
+    '''
+    return 1 - (1 - β)**(k*ρ)
