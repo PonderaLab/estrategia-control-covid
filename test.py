@@ -7,8 +7,8 @@ from arenas_model import *
 
 
 def main():
-    # Set number of compartiments (S,E,A,I,H,R,D -> 7)
-    NC = 7
+    # Set number of compartiments (S,E,A,I,H,Rᴵ,Rᴴ,D -> 8)
+    NC = 8
 
     ##--SET ARTIFICIAL POPULATIONS, AREAS, AND MOBILITIES--##
 
@@ -17,10 +17,10 @@ def main():
 
     ##--SET MODEL PARAMETERS--##
 
-    # Arenas parameters
+    # Arenas parameters (χ is repeated for the new model with one more compartiment)
     import arenas_params as ap
     params = [
-        ap.β, ap.kg, ap.η, ap.αg, ap.ν, ap.μg, ap.γg, ap.ωg, ap.ψg, ap.χg, N, ap.σ, ap.κ0, ap.ϕ, ap.tc, ap.tf
+        ap.β, ap.kg, ap.η, ap.αg, ap.ν, ap.μg, ap.γg, ap.ωg, ap.ψg, ap.χg, ap.χg, N, ap.σ, ap.κ0, ap.ϕ, ap.tc, ap.tf
     ]
 
     ## Containtment parameters
@@ -54,20 +54,22 @@ def main():
 
     # Plot the aggregate dynamics
 
-    S =  [flow[t][0] for t in range(flow.shape[0])]
-    E =  [flow[t][1] for t in range(flow.shape[0])]
-    A =  [flow[t][2] for t in range(flow.shape[0])]
-    I =  [flow[t][3] for t in range(flow.shape[0])]
-    H =  [flow[t][4] for t in range(flow.shape[0])]
-    R =  [flow[t][5] for t in range(flow.shape[0])]
-    D =  [flow[t][6] for t in range(flow.shape[0])]
+    S  =  [flow[t][0] for t in range(flow.shape[0])]
+    E  =  [flow[t][1] for t in range(flow.shape[0])]
+    A  =  [flow[t][2] for t in range(flow.shape[0])]
+    I  =  [flow[t][3] for t in range(flow.shape[0])]
+    H  =  [flow[t][4] for t in range(flow.shape[0])]
+    Rᴵ =  [flow[t][5] for t in range(flow.shape[0])]
+    Rᴴ =  [flow[t][6] for t in range(flow.shape[0])]
+    D  =  [flow[t][7] for t in range(flow.shape[0])]
 
     plt.plot(S, label='S')
     plt.plot(E, label='E')
     plt.plot(A, label='A')
     plt.plot(I, label='I')
     plt.plot(H, label='H')
-    plt.plot(R, label='R')
+    plt.plot(Rᴵ, label='Rᴵ')
+    plt.plot(Rᴴ, label='Rᴴ')
     plt.plot(D, label='D')
 
     # containment dates
@@ -75,6 +77,8 @@ def main():
     plt.axvline([tc+tf], label='release', c='black', lw=1, ls='--')
 
     plt.title('Aggregate of all cases')
+    plt.xlabel('Days since t0')
+    plt.xlabel('Number of people')
     plt.legend()
     plt.show()
 

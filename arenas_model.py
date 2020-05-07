@@ -20,18 +20,19 @@ def markov_step(x, M):
     `M`: list of non-zero elements of the transition matrix M
     '''
     # state variables
-    S,E,A,I,H,R,D = x
+    S,E,A,I,H,Rᴵ,Rᴴ,D = x
     # interaction terms
-    M_SS, M_ES, M_EE, M_AE, M_AA, M_IA, M_II, M_HI, M_HH, M_RI, M_RH, M_RR, M_DH, M_DD = M
+    M_SS, M_ES, M_EE, M_AE, M_AA, M_IA, M_II, M_HI, M_HH, M_RᴵI, M_RᴵRᴵ, M_RᴴH, M_RᴴRᴴ, M_DH, M_DD = M
 
     return np.array([
-        M_SS * S,
-        M_ES * S + M_EE * E,
-        M_AE * E + M_AA * A,
-        M_IA * A + M_II * I,
-        M_HI * I + M_HH * H,
-        M_RI * I + M_RH * H + M_RR * R,
-        M_DH * H + M_DD * D
+        M_SS * S,                 # S
+        M_ES * S + M_EE * E,      # E
+        M_AE * E + M_AA * A,      # A
+        M_IA * A + M_II * I,      # I
+        M_HI * I + M_HH * H,      # H
+        M_RᴵI * I + M_RᴵRᴵ * Rᴵ,  # Rᴵ
+        M_RᴴH * H + M_RᴴRᴴ * Rᴴ,  # Rᴴ
+        M_DH * H + M_DD * D       # D
     ])
 
 def iterate_model(x0, T, params):
@@ -58,36 +59,38 @@ def iterate_model(x0, T, params):
     γ = params[6]
     ω = params[7]
     ψ = params[8]
-    χ = params[9]
-    n = params[10] # population
+    χᴵ = params[9]
+    χᴴ = params[10]
+    n = params[11] # population
     # containtment params
-    σ  = params[11]
-    κ0 = params[12]
-    ϕ  = params[13]
-    tc = params[14]
-    tf = params[15]
+    σ  = params[12]
+    κ0 = params[13]
+    ϕ  = params[14]
+    tc = params[15]
+    tf = params[16]
 
     # Compute transmission probability
     Π_t = Π_1D( x0[2]+ ν*x0[3], β, k)
 
     # Compute interaction terms
-    M_SS = 1 - Π_t
-    M_ES = Π_t
-    M_EE = 1 - η
-    M_AE = η
-    M_AA = 1 - α
-    M_IA = α
-    M_II = 1 - μ
-    M_HI = μ * γ
-    M_HH = ω * (1 - ψ) + (1 - ω)*(1 - χ)
-    M_RI = μ * (1 - γ)
-    M_RH = (1 - ω) * χ
-    M_RR = 1
-    M_DH = ω * ψ
-    M_DD = 1
+    M_SS   = 1 - Π_t
+    M_ES   = Π_t
+    M_EE   = 1 - η
+    M_AE   = η
+    M_AA   = 1 - α
+    M_IA   = α
+    M_II   = γ * (1 - μ) + (1 - γ) * (1 - χᴵ)
+    M_HI   = γ * μ
+    M_HH   = ω * (1 - ψ) + (1 - ω) * (1 - χᴴ)
+    M_RᴵI  = (1 - γ) * χᴵ
+    M_RᴵRᴵ = 1
+    M_RᴴH  = (1 - ω) * χᴴ
+    M_RᴴRᴴ = 1
+    M_DH   = ω * ψ
+    M_DD   = 1
 
     ## Non-zero interactions for transition-like matrix
-    M = [M_SS, M_ES, M_EE, M_AE, M_AA, M_IA, M_II, M_HI, M_HH, M_RI, M_RH, M_RR, M_DH, M_DD]
+    M = [M_SS, M_ES, M_EE, M_AE, M_AA, M_IA, M_II, M_HI, M_HH, M_RᴵI, M_RᴵRᴵ, M_RᴴH, M_RᴴRᴴ, M_DH, M_DD]
 
     ## PREALLOCATION
     flow = np.zeros( [T+1, *x0.shape] )
