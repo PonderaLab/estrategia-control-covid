@@ -2,6 +2,6 @@ This repository contains the code for the **decoupled** Covid-19 epidemic model 
 
 The function `iterate_model` in `arenas_model.py` runs by passing initial conditions, parameters, and the number of days to simulate.
 
-The script `test.ty` makes a very simple simulation using the paremeters reported in [[2]](https://www.medrxiv.org/content/10.1101/2020.04.06.20054320v1.full.pdf) with artificial data on the initial conditions and the mobility patterns of the model. The figure below shows a typical output of the simulation for a random patch and age strata of the model. 
+The script `test.ty` makes a very simple simulation using the paremeters reported in [[2]](https://www.medrxiv.org/content/10.1101/2020.04.06.20054320v1.full.pdf) with artificial data on the initial conditions and total population. The figure below shows a typical output of the simulation by imposing containtment and release measures. 
 
 ![](output_model_example.png)
