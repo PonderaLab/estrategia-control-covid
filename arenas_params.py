@@ -9,8 +9,9 @@ import numpy as np
 # Parámetros en [2]
 R_0 = 2.3 # mentioned in the abstract of [1]
 
-β = 0.06 # infectivity of the desease
-η = 1/2.34 # η^-1 + α^-1 = 1/5.2 # exposed latent rate
+β  = 0.06 # infectivity of the desease
+η  = 1/2.34 # η^-1 + α^-1 = 1/5.2 # exposed latent rate
+αg = 1/2.86 # np.array( [1/8.86, 1/2.86, 1/2.86] ) # asymptomatic infectious rate by age group
 ωg = 0.42 # fatality rate of ICU patients
 ψg = 1/7  # death rate
 χg = 1/20 # ICU discharge rate (1/10 in [2])
@@ -21,7 +22,6 @@ pg = 1 # np.array( [0,1,0] ) # mobility factor by age strata
 γg = 0.05 # np.array( [0.002, 0.05, 0.36] ) # fraction of cases requiring ICU by age group
 # Cambiar:
 kg = 13.3 # np.array( [11.8, 13.3, 6.6] ) # average contacts per day by age group
-αg = 1/2.86 # np.array( [1/8.86, 1/2.86, 1/2.86] ) # asymptomatic infectious rate by age group
 Cgh  = 1 # np.array( [[0.5980, 0.3849, 0.0171],
             #   [0.2440, 0.7210, 0.0350],
             #   [0.1919, 0.5705, 0.2376]] ) # contacts-by-age-strata matrix
@@ -34,6 +34,6 @@ tc = np.inf # days from t0 for containtment
 tf = np.inf # days from tc to finalize containtment
 
 # Parámetros diferentes en [1]
-# χg = 1/10
+χg = 1/10
 # μg = np.array([1/1,1/3.2,1/3.2]) # escape (from Infected) rate by age group
 # αg = np.array([1/5.06, 1/2.86, 1/2.86]) # asymptomatic infectious rate by age group
