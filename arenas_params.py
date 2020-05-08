@@ -34,6 +34,6 @@ tc = np.inf # days from t0 for containtment
 tf = np.inf # days from tc to finalize containtment
 
 # Parámetros diferentes en [1]
-χg = 1/10
+# χg = 1/10
 # μg = np.array([1/1,1/3.2,1/3.2]) # escape (from Infected) rate by age group
 # αg = np.array([1/5.06, 1/2.86, 1/2.86]) # asymptomatic infectious rate by age group

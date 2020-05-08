@@ -4,6 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from arenas_model import *
+from  data_handling.parameters import get_params_arenas
 
 
 def main():
@@ -18,10 +19,7 @@ def main():
     ##--SET MODEL PARAMETERS--##
 
     # Arenas parameters (χ is repeated for the new model with one more compartiment)
-    import arenas_params as ap
-    params = [
-        ap.β, ap.kg, ap.η, ap.αg, ap.ν, ap.μg, ap.γg, ap.ωg, ap.ψg, ap.χg, ap.χg, N, ap.σ, ap.κ0, ap.ϕ, ap.tc, ap.tf
-    ]
+    params = get_params_arenas()
 
     ## Containtment parameters
     tc = 10
