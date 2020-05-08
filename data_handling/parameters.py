@@ -36,6 +36,7 @@
 import pandas as pd
 import numpy as np
 import datetime as dt
+import math
 
 # Libraries for fitting
 from sklearn.linear_model import LinearRegression
