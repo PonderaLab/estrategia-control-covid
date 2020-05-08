@@ -69,7 +69,7 @@ def iterate_model(x0, T, params):
     tc = params[15]
     tf = params[16]
 
-    # Compute transmission probability
+    # Compute infection probability
     Π_t = Π_1D( x0[2]+ ν*x0[3], β, k)
 
     # Compute interaction terms
@@ -96,6 +96,22 @@ def iterate_model(x0, T, params):
     flow = np.zeros( [T+1, *x0.shape] )
     flow[0,:] = x0
 
+    # Case when containtment happens before initial conditions
+    # This is only approximate, as we don't know how many people where susceptible at containtment date
+    if tc < 0:
+        # Lower avg. number of contacts as a function of containtment
+        k = (1-κ0)*k + κ0*(σ-1)
+
+        # Compute infection probability
+        Π_t = Π_1D( x0[2]+ν*x0[3], β, k )
+
+        ## Contained people (susceptible + recovered)
+        C_tc = ( x0[0]+x0[5] )**σ
+
+        # update dynamic interaction terms
+        M[0] = (1 - Π_t)*(1 - (1 - ϕ)*κ0*C_tc)
+        M[1] = Π_t*(1 - (1 - ϕ)*κ0*C_tc)
+
     x_old = x0
 
     ## MODEL DYNAMICS
@@ -111,7 +127,7 @@ def iterate_model(x0, T, params):
             # Lower avg. number of contacts as a function of containtment
             k = (1-κ0)*k + κ0*(σ-1)
 
-            # 1-D treatment
+            # Compute infection probability
             Π_t = Π_1D( x_new[2]+ν*x_new[3], β, k )
 
             ## Contained people (susceptible + recovered)
@@ -134,7 +150,7 @@ def iterate_model(x0, T, params):
             # mid-agers (1-D treatment)
             k = ( k - κ0*(σ-1) ) / (1 - κ0)
 
-            # 1-D treatment
+            # Compute infection probability
             Π_t = Π_1D( x_new[2]+ν*x_new[3], β, k )
 
             # update dynamic interaction terms
