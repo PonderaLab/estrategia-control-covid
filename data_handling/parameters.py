@@ -1,6 +1,4 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 '''
     Este módulo tiene todas las funciones pertinentes para obtener y/o calcular los diferentes parámetros del modelo a partir de datos y/o parámetros del artículo de Arenas.
 
@@ -127,6 +125,7 @@ def get_parametros(series, estado='Nacional'):
 
     return γ, ω, χᴵ, σ
 
+
 def get_poblacion(estado):
     '''
     Población (según Wikipedia) para `estado`.
@@ -134,6 +133,30 @@ def get_poblacion(estado):
 
     path = './data/poblaciones_y_superficies_por_estado.csv'
     return pd.read_csv( path, index_col='ENTIDAD' )['POBLACIONES'][estado]
+
+
+def get_t0(series, estado, umbral=30):
+    '''
+    Da el día en el que se cruza el `umbral` de hospitalizados.
+    Por default, se toma un umbral de 30 hospitalizados. Recomendamos no tomar menos.
+
+    Inputs:
+        - series: Dataframe con las series de tiempo de todos los estados
+        - estado: Entidad federativa a considerar
+        - umbral=30: Corte de casos de hospitalización
+
+    Output:
+        - t0: fecha en la cual el estado cruza el `umbral` de hospitalizados.
+
+    '''
+
+    series = get_serie_estatal(series, estado)
+
+    try:
+        return series[series['hospitalizados_acumulados'] >= umbral]['confirmados_acumulados'].idxmin()
+    except:
+        raise ValueError( 'No se ha cruzado el umbral de {} hospitalizados para {}.'.format( umbral, estado ) )
+
 
 ### FUNCIONES DE FIT ###
 
@@ -155,15 +178,15 @@ def get_fit_param(series, estado, umbral=25, t0_fit=None):
 
     if t0_fit == None:
         t0_fit = get_t0(series, estado, umbral=umbral)
-#         t0_fit = dias_desde_t0(t0_fit, 8)
+        #t0_fit = dias_desde_t0(t0_fit, 8)
         tf_fit = dias_desde_t0(t0_fit, n_dias=8)
 
     series = get_serie_estatal(series, estado)
 
     series = series.loc[t0_fit:tf_fit,'hospitalizados_acumulados']
-#     series = series.loc[t0_fit:tf_fit,'fallecidos_acumulados']
-#     series = series.loc[t0_fit:tf_fit,'fallecidos_diarios']
-#     series = series.loc[t0_fit:tf_fit,'hospitalizados_diarios']
+    #series = series.loc[t0_fit:tf_fit,'fallecidos_acumulados']
+    #series = series.loc[t0_fit:tf_fit,'fallecidos_diarios']
+    #series = series.loc[t0_fit:tf_fit,'hospitalizados_diarios']
 
     ydata = np.log(series)
     xdata = np.array( range(len(ydata)) ).reshape(-1,1)
