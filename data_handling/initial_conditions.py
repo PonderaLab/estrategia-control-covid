@@ -1,6 +1,4 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 '''
     Este módulo tiene todas las funciones pertinentes para obtener y/o calcular las condiciones iniciales del modelo a partir de datos y parámetros.
 
@@ -22,29 +20,6 @@ from data_handling.parameters import *
 
 # El modelo
 from arenas_model import iterate_model
-
-
-def get_t0(series, estado, umbral=30):
-    '''
-    Da el día en el que se cruza el `umbral` de hospitalizados.
-    Por default, se toma un umbral de 30 hospitalizados. Recomendamos no tomar menos.
-
-    Inputs:
-        - series: Dataframe con las series de tiempo de todos los estados
-        - estado: Entidad federativa a considerar
-        - umbral=30: Corte de casos de hospitalización
-
-    Output:
-        - t0: fecha en la cual el estado cruza el `umbral` de hospitalizados.
-
-    '''
-
-    series = get_serie_estatal(series, estado)
-
-    try:
-        return series[series['hospitalizados_acumulados'] >= umbral]['confirmados_acumulados'].idxmin()
-    except:
-        raise ValueError( 'No se ha cruzado el umbral de {} hospitalizados para {}.'.format( umbral, estado ) )
 
 
 def get_condiciones_iniciales(series, estado, params, t0):
