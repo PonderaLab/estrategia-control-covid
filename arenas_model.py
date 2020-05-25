@@ -41,7 +41,7 @@ def iterate_model(x0, T, params):
 
     Inputs:
     `x0`: list with the initial compartiment densities (S0, E0, A0, I0, H0, R0, D0)
-    `params`': list of parameters in the same order than in Arenas report [2]: (β, kg, ηg, αg, ν, μg, γg, ωg, ψg, χg, n_ig, σ, κ0, ϕ, tc, tf, κf)
+    `params`': list of parameters in the same order than in Arenas report [2]: (β, kg, ηg, αg, ν, μg, γg, ωg, ψg, χg, n_ig, σ, κ0, ϕ, tc, tf, κf, tp)
 
     Output:
     `flow`: 7-dimensional time series. Each dimension corresponds to S(t), E(t), A(t), I(t), H(t), R(t), D(t) respectively.
@@ -69,6 +69,7 @@ def iterate_model(x0, T, params):
     tc = params[15]
     tf = params[16]
     κf = params[17]
+    tp = params[18]
 
     # Compute infection probability
     Π_t = Π_1D( x0[2]+ ν*x0[3], β, k)
@@ -146,11 +147,33 @@ def iterate_model(x0, T, params):
             M[0] = (1 - Π_t)
             M[1] = Π_t
 
-        # end of containtment
-        if t+1 == tc+tf:
+        # end of containtment: control reopening
+        if t+1 == tc + tf:
             # mid-agers (1-D treatment)
             k = ( k - κ0*(σ-1) ) / (1 - κ0)
-            k = (1-κf)*k + κf*(σ-1)  # new normality containment
+            k = (1-3*κf)*k + 3*κf*(σ-1)  # new normality containment phase 1
+
+            # Compute infection probability
+            Π_t = Π_1D( x_new[2]+ν*x_new[3], β, k )
+
+            # update dynamic interaction terms
+            M[0] = (1 - Π_t)*(1 + (1 - ϕ)*3*κf*C_tc)
+            M[1] = Π_t*(1 + (1 - ϕ)*3*κf*C_tc)
+        elif t+1 == tc + tf + (tp):
+            # mid-agers (1-D treatment)
+            k = ( k - 3*κf*(σ-1) ) / (1 - 3*κf)
+            k = (1-2*κf)*k + 2*κf*(σ-1)  # new normality containment phase 2
+
+            # Compute infection probability
+            Π_t = Π_1D( x_new[2]+ν*x_new[3], β, k )
+
+            # update dynamic interaction terms
+            M[0] = (1 - Π_t)*(1 + (1 - ϕ)*2*κf*C_tc)
+            M[1] = Π_t*(1 + (1 - ϕ)*2*κf*C_tc)
+        elif t+1 == tc + tf + (tp)*2:
+            # mid-agers (1-D treatment)
+            k = ( k - 2*κf*(σ-1) ) / (1 - 2*κf)
+            k = (1-κf)*k + κf*(σ-1)  # new normality containment phase 3
 
             # Compute infection probability
             Π_t = Π_1D( x_new[2]+ν*x_new[3], β, k )

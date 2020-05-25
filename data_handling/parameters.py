@@ -27,6 +27,7 @@
     tc = params[15]
     tf = params[16]
     κf = params[17]
+    tp = params[18]
 
     [1]: Arenas, Alex, et al. "Derivation of the effective reproduction number R for COVID-19 in relation to mobility restrictions and confinement." medRxiv (2020).
 '''
@@ -82,6 +83,7 @@ def get_params_arenas():
         ap.tc, # 15: días desde t0 para confinamiento
         ap.tf, # 16: días desde confinamiento para reactivación
         ap.κf, # 17: parametro que refleja la nueva normalidad
+        ap.tp, # 17: parametro que refleja la nueva normalidad> el tiempo en dias de las fases
          ]
 
     return params
