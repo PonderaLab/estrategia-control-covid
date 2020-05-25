@@ -32,6 +32,7 @@ Cgh  = 1 # np.array( [[0.5980, 0.3849, 0.0171],
 ϕ = 0.2 # permeability factor: adjustable for containment
 tc = np.inf # days from t0 for containtment
 tf = np.inf # days from tc to finalize containtment
+κf = 0.3
 
 # Parámetros diferentes en [1]
 # χg = 1/10

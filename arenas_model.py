@@ -41,7 +41,7 @@ def iterate_model(x0, T, params):
 
     Inputs:
     `x0`: list with the initial compartiment densities (S0, E0, A0, I0, H0, R0, D0)
-    `params`': list of parameters in the same order than in Arenas report [2]: (β, kg, ηg, αg, ν, μg, γg, ωg, ψg, χg, n_ig, σ, κ0, ϕ, tc, tf)
+    `params`': list of parameters in the same order than in Arenas report [2]: (β, kg, ηg, αg, ν, μg, γg, ωg, ψg, χg, n_ig, σ, κ0, ϕ, tc, tf, κf)
 
     Output:
     `flow`: 7-dimensional time series. Each dimension corresponds to S(t), E(t), A(t), I(t), H(t), R(t), D(t) respectively.
@@ -68,6 +68,7 @@ def iterate_model(x0, T, params):
     ϕ  = params[14]
     tc = params[15]
     tf = params[16]
+    κf = params[17]
 
     # Compute infection probability
     Π_t = Π_1D( x0[2]+ ν*x0[3], β, k)
@@ -149,13 +150,14 @@ def iterate_model(x0, T, params):
         if t+1 == tc+tf:
             # mid-agers (1-D treatment)
             k = ( k - κ0*(σ-1) ) / (1 - κ0)
+            k = (1-κf)*k + κf*(σ-1)  # new normality containment
 
             # Compute infection probability
             Π_t = Π_1D( x_new[2]+ν*x_new[3], β, k )
 
             # update dynamic interaction terms
-            M[0] = (1 - Π_t)*(1 + (1 - ϕ)*κ0*C_tc)
-            M[1] = Π_t*(1 + (1 - ϕ)*κ0*C_tc)
+            M[0] = (1 - Π_t)*(1 + (1 - ϕ)*κf*C_tc)
+            M[1] = Π_t*(1 + (1 - ϕ)*κf*C_tc)
 
         x_old = x_new
 
